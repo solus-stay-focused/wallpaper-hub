@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#080d18">
+<title>WallpaperHub — Daily Wallpapers</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070c16;--card:#101827;--card2:#151f31;--text:#f7f8fc;--muted:#8f9bb0;
+  --purple:#7c5cff;--purple2:#a78bfa;--line:rgba(255,255,255,.08);
+}
+body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#02050a;color:var(--text);min-height:100vh}
+button{font:inherit;color:inherit;border:0;cursor:pointer}
+.app{width:100%;max-width:520px;min-height:100vh;margin:auto;background:var(--bg);position:relative;overflow:hidden}
+.topbar{height:72px;padding:18px 18px 10px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(7,12,22,.9);backdrop-filter:blur(18px);z-index:10}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}
+.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#8d72ff,#d4a7ff);display:grid;place-items:center;color:#fff;font-size:20px;box-shadow:0 8px 25px #6c4cff44}
+.top-actions{display:flex;gap:8px}.icon-btn{width:38px;height:38px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
+main{padding:0 18px 96px}
+h1{font-size:28px;line-height:1.1;margin:14px 0 7px}.sub{color:var(--muted);font-size:13px}
+.section{margin-top:27px}.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}.section-head h2{font-size:17px}.see{font-size:12px;color:#a99aff;background:none}
+.hero{height:330px;border-radius:22px;overflow:hidden;position:relative;background-size:cover;background-position:center;box-shadow:0 15px 40px #0008}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 35%,rgba(2,5,10,.9))}
+.hero-content{position:absolute;z-index:1;bottom:18px;left:18px;right:18px}.pill{display:inline-flex;padding:6px 10px;border-radius:99px;background:#7c5cff;color:#fff;font-size:11px;font-weight:700;margin-bottom:10px}.hero-title{font-size:22px;font-weight:800}.hero-meta{font-size:12px;color:#d2d7e2;margin-top:5px}.heart{position:absolute;z-index:2;right:14px;bottom:16px;width:43px;height:43px;border-radius:50%;background:#111a2bde;display:grid;place-items:center;font-size:21px;border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.cat{aspect-ratio:1/.95;border-radius:15px;overflow:hidden;position:relative;background:var(--card);border:1px solid var(--line)}.cat img{width:100%;height:100%;object-fit:cover}.cat:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(transparent,#000b)}.cat span{position:absolute;z-index:1;bottom:9px;left:10px;font-size:12px;font-weight:700}
+.wall-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.wall{aspect-ratio: .78;border-radius:17px;overflow:hidden;position:relative;background:var(--card);cursor:pointer}.wall img{width:100%;height:100%;object-fit:cover;transition:.3s}.wall:hover img{transform:scale(1.04)}.wall .wall-info{position:absolute;left:10px;right:10px;bottom:10px;z-index:2}.wall:after{content:"";position:absolute;inset:50% 0 0;background:linear-gradient(transparent,#000c)}.wall-title{font-size:12px;font-weight:700}.wall-cat{font-size:10px;color:#c5cbd6;margin-top:2px}.mini-heart{position:absolute;right:9px;top:9px;z-index:3;width:31px;height:31px;border-radius:50%;background:#0a101dcc;display:grid;place-items:center}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;height:76px;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:rgba(7,12,22,.95);border-top:1px solid var(--line);backdrop-filter:blur(18px);display:grid;grid-template-columns:repeat(4,1fr);z-index:20}.nav{background:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10px}.nav .ni{font-size:20px}.nav.active{color:#9d89ff}.page{display:none}.page.active{display:block}
+.search{width:100%;height:46px;border-radius:14px;border:1px solid var(--line);background:var(--card);padding:0 15px;color:#fff;outline:none;margin-top:16px}.chips{display:flex;gap:8px;overflow:auto;padding-bottom:4px}.chip{white-space:nowrap;background:var(--card);border:1px solid var(--line);padding:9px 13px;border-radius:99px;color:#b6c0d1;font-size:12px}.chip.selected{background:var(--purple);color:#fff;border-color:transparent}
+.viewer{position:fixed;inset:0;background:#02050a;z-index:50;display:none}.viewer.show{display:block}.viewer img{width:100%;height:100%;object-fit:cover}.viewer:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 60%,#000d)}.viewer-top{position:absolute;top:20px;left:18px;right:18px;z-index:2;display:flex;justify-content:space-between}.viewer-bottom{position:absolute;z-index:2;left:18px;right:18px;bottom:30px}.viewer-title{font-size:25px;font-weight:800}.viewer-meta{color:#d2d7e2;margin:5px 0 15px;font-size:13px}.fav-big{width:48px;height:48px;border-radius:50%;background:#7c5cff;display:grid;place-items:center;font-size:22px}
+.modal{position:fixed;inset:0;background:#0009;z-index:60;display:none;align-items:flex-end}.modal.show{display:flex}.sheet{width:100%;max-width:520px;margin:auto;background:#111a2a;border-radius:25px 25px 0 0;padding:25px 20px 30px;border:1px solid var(--line)}.sheet h2{font-size:23px}.sheet p{color:var(--muted);font-size:13px;line-height:1.6;margin:8px 0 20px}.plans{display:grid;grid-template-columns:1fr 1fr;gap:10px}.plan{border:1px solid #ffffff18;background:#0b1321;border-radius:17px;padding:16px;text-align:center}.plan.best{border-color:#7c5cff;background:#20184c}.price{font-size:23px;font-weight:800;margin:7px 0}.cta{width:100%;height:48px;border-radius:14px;background:var(--purple);font-weight:800;margin-top:15px}
+.profile-card{background:var(--card);border:1px solid var(--line);padding:18px;border-radius:18px;margin-top:20px}.profile-row{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-bottom:1px solid var(--line)}.profile-row:last-child{border:0}.profile-row small{color:var(--muted);display:block;margin-top:3px}.toggle{width:42px;height:24px;border-radius:99px;background:#334056;padding:3px}.toggle i{display:block;width:18px;height:18px;border-radius:50%;background:#fff}.toggle.on{background:var(--purple)}.toggle.on i{margin-left:18px}
+@media(min-width:700px){body{padding:20px}.app{border-radius:28px;box-shadow:0 25px 80px #0008;min-height:calc(100vh - 40px)}.bottom{bottom:20px;border-radius:20px;width:calc(100% - 20px)}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="brand"><div class="logo">◢</div> WallpaperHub</div>
+  <div class="top-actions"><button class="icon-btn" onclick="openPage('search')">⌕</button><button class="icon-btn" onclick="openPage('profile')">◉</button></div>
+</header>
+
+<main>
+<section id="home" class="page active">
+  <h1>Today's Wallpapers</h1><div class="sub">Fresh wallpapers, updated every day.</div>
+  <div class="section">
+    <div class="hero" id="hero" style="background-image:url('https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1000&q=85')">
+      <button class="heart" onclick="toggleFavorite(0,event)">♡</button>
+      <div class="hero-content"><span class="pill">NEW TODAY</span><div class="hero-title">Mountain Escape</div><div class="hero-meta">Nature • Today's Drop</div></div>
+    </div>
+  </div>
+  <div class="section"><div class="section-head"><h2>Categories</h2><button class="see" onclick="openPage('categories')">See all</button></div>
+    <div class="grid" id="homeCats"></div>
+  </div>
+  <div class="section"><div class="section-head"><h2>New Today</h2><span class="sub">30 wallpapers</span></div><div class="wall-grid" id="homeWalls"></div></div>
+</section>
+
+<section id="categories" class="page">
+  <h1>Categories</h1><div class="sub">Choose what you want to see.</div>
+  <input class="search" placeholder="Search categories..." oninput="filterCats(this.value)">
+  <div class="section"><div class="grid" id="allCats"></div></div>
+</section>
+
+<section id="favorites" class="page">
+  <h1>Your Favorites</h1><div class="sub">Saved on this device. No account required.</div>
+  <div class="section"><div class="wall-grid" id="favWalls"></div></div>
+</section>
+
+<section id="profile" class="page">
+  <h1>Profile</h1><div class="sub">You can use WallpaperHub without an account.</div>
+  <div class="profile-card">
+    <div class="profile-row"><div><b>Guest User</b><small>Account is optional</small></div><button class="chip" onclick="alert('Login can be connected to Firebase later.')">Sign in</button></div>
+    <div class="profile-row"><div><b>Selected Categories</b><small>Personalize your daily feed</small></div><span>›</span></div>
+    <div class="profile-row"><div><b>Daily Notifications</b><small>New wallpapers every day</small></div><button class="toggle on" onclick="this.classList.toggle('on')"><i></i></button></div>
+    <div class="profile-row" onclick="openPremium()"><div><b>Wallpaper Plus</b><small>Premium wallpapers + no ads</small></div><span>›</span></div>
+    <div class="profile-row"><div><b>Privacy Policy</b></div><span>›</span></div>
+    <div class="profile-row"><div><b>About</b></div><span>›</span></div>
+  </div>
+</section>
+
+<section id="search" class="page">
+  <h1>Search</h1><div class="sub">Find a wallpaper by category or mood.</div>
+  <input class="search" id="searchInput" placeholder="Search wallpapers..." oninput="searchWalls(this.value)">
+  <div class="section"><div class="chips" id="searchChips"></div></div>
+  <div class="section"><div class="wall-grid" id="searchWalls"></div></div>
+</section>
+</main>
+
+<nav class="bottom">
+  <button class="nav active" data-page="home" onclick="openPage('home')"><span class="ni">⌂</span>Home</button>
+  <button class="nav" data-page="categories" onclick="openPage('categories')"><span class="ni">▦</span>Categories</button>
+  <button class="nav" data-page="favorites" onclick="openPage('favorites')"><span class="ni">♡</span>Favorites</button>
+  <button class="nav" data-page="profile" onclick="openPage('profile')"><span class="ni">◉</span>Profile</button>
+</nav>
+
+<div class="viewer" id="viewer">
+  <div class="viewer-top"><button class="icon-btn" onclick="closeViewer()">←</button><button class="icon-btn" onclick="toggleFavorite(currentIndex)">♡</button></div>
+  <img id="viewerImg" src="">
+  <div class="viewer-bottom"><div class="viewer-title" id="viewerTitle"></div><div class="viewer-meta" id="viewerMeta"></div><button class="fav-big" onclick="toggleFavorite(currentIndex)">♡</button></div>
+</div>
+
+<div class="modal" id="premium">
+ <div class="sheet">
+   <h2>Wallpaper Plus</h2>
+   <p>More wallpapers. No ads. More to love. Your basic daily wallpaper experience always stays free.</p>
+   <div class="plans"><div class="plan"><small>MONTHLY</small><div class="price">$1.99</div><small>per month</small></div><div class="plan best"><small>BEST VALUE</small><div class="price">$14.99</div><small>per year</small></div></div>
+   <button class="cta" onclick="alert('Connect this button to your payment provider.')">Upgrade to Premium</button>
+   <button class="see" style="width:100%;margin-top:14px" onclick="document.getElementById('premium').classList.remove('show')">Maybe later</button>
+ </div>
+</div>
+</div>
+
+<script>
+const cats=[
+ ['Nature','https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=600&q=80'],
+ ['Minimal','https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80'],
+ ['Dark','https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=600&q=80'],
+ ['Abstract','https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=600&q=80'],
+ ['Anime','https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=600&q=80'],
+ ['Space','https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?auto=format&fit=crop&w=600&q=80'],
+ ['Cars','https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80'],
+ ['Animals','https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=600&q=80'],
+ ['City','https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=600&q=80'],
+ ['Ocean','https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'],
+ ['Mountains','https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80'],
+ ['Aesthetic','https://images.unsplash.com/photo-1497250681960-ef046c08a56e?auto=format&fit=crop&w=600&q=80']
+];
+const walls=[
+ ['Mountain Escape','Nature',cats[0][1]],['Forest Path','Nature','https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=700&q=80'],
+ ['Ocean Blue','Ocean',cats[9][1]],['Night City','City',cats[8][1]],
+ ['Purple Flow','Abstract',cats[3][1]],['Dark Mountains','Dark',cats[2][1]],
+ ['Desert Minimal','Minimal','https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=700&q=80'],
+ ['Night Sky','Space',cats[5][1]],['Wild Wolf','Animals',cats[7][1]],['Green Calm','Aesthetic',cats[11][1]]
+];
+let favorites=JSON.parse(localStorage.getItem('wh-favs')||'[]');let currentIndex=0;
+
+function catCard(c,i){return `<div class="cat" onclick="filterByCat('${c[0]}')"><img src="${c[1]}" loading="lazy"><span>${c[0]}</span></div>`}
+function wallCard(w,i){let active=favorites.includes(i);return `<div class="wall" onclick="openViewer(${i})"><img src="${w[2]}" loading="lazy"><button class="mini-heart" onclick="toggleFavorite(${i},event)">${active?'♥':'♡'}</button><div class="wall-info"><div class="wall-title">${w[0]}</div><div class="wall-cat">${w[1]}</div></div></div>`}
+function render(){document.getElementById('homeCats').innerHTML=cats.slice(0,6).map(catCard).join('');document.getElementById('allCats').innerHTML=cats.map(catCard).join('');document.getElementById('homeWalls').innerHTML=walls.slice(0,6).map(wallCard).join('');renderFavs();document.getElementById('searchChips').innerHTML=cats.slice(0,8).map(c=>`<button class="chip" onclick="searchWalls('${c[0]}')">${c[0]}</button>`).join('');document.getElementById('searchWalls').innerHTML=walls.map(wallCard).join('')}
+function renderFavs(){let f=walls.map((w,i)=>favorites.includes(i)?wallCard(w,i):'').join('');document.getElementById('favWalls').innerHTML=f||'<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#8f9bb0">No favorites yet.<br>Tap ♡ on a wallpaper to save it.</div>'}
+function toggleFavorite(i,e){if(e)e.stopPropagation();favorites=favorites.includes(i)?favorites.filter(x=>x!==i):[...favorites,i];localStorage.setItem('wh-favs',JSON.stringify(favorites));render();if(document.getElementById('viewer').classList.contains('show'))document.querySelector('.viewer-top .icon-btn:last-child').textContent=favorites.includes(i)?'♥':'♡'}
+function openViewer(i){currentIndex=i;let w=walls[i];document.getElementById('viewerImg').src=w[2];document.getElementById('viewerTitle').textContent=w[0];document.getElementById('viewerMeta').textContent=w[1]+' • New today';document.getElementById('viewer').classList.add('show')}
+function closeViewer(){document.getElementById('viewer').classList.remove('show')}
+function openPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'})}
+function filterCats(q){document.querySelectorAll('#allCats .cat').forEach((x,i)=>x.style.display=cats[i][0].toLowerCase().includes(q.toLowerCase())?'':'none')}
+function filterByCat(c){openPage('search');document.getElementById('searchInput').value=c;searchWalls(c)}
+function searchWalls(q){q=q.toLowerCase();document.getElementById('searchWalls').innerHTML=walls.map((w,i)=>(!q||w[0].toLowerCase().includes(q)||w[1].toLowerCase().includes(q))?wallCard(w,i):'').join('')||'<div style="grid-column:1/-1;padding:40px;text-align:center;color:#8f9bb0">No wallpapers found.</div>'}
+function openPremium(){document.getElementById('premium').classList.add('show')}
+render();
+</script>
+</body>
+</html>
