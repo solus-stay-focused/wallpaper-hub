@@ -182,6 +182,14 @@ h1{font-size:31px;line-height:1.08;margin:17px 0 8px;letter-spacing:-.04em}.sub{
 @media(max-width:430px){.auth-box{padding:22px 16px 19px;border-radius:22px}.auth-head{padding-left:18px;padding-right:18px}}
 
 </style>
+<style>
+.sponsor-card{display:block;position:relative;height:190px;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.1);box-shadow:var(--shadow);text-decoration:none;color:#fff;background:#111827}
+.sponsor-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sponsor-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(2,5,10,.92) 100%)}
+.sponsor-info{position:absolute;z-index:1;left:16px;right:16px;bottom:14px}
+.sponsor-info .pill{margin-bottom:8px;background:linear-gradient(135deg,#f5a524,#d9822b)}
+.sponsor-title{font-weight:800;font-size:18px}.sponsor-adv{font-size:12px;color:#c9d2e3;margin-top:2px}
+</style>
 </head>
 <body>
 <div class="app">
@@ -193,6 +201,12 @@ h1{font-size:31px;line-height:1.08;margin:17px 0 8px;letter-spacing:-.04em}.sub{
 <main>
 <section id="home" class="page active">
   <h1>Today's Wallpapers</h1><div class="sub">Fresh wallpapers, updated every day.</div>
+  <div class="section" id="sponsorSection" style="display:none">
+    <a class="sponsor-card" id="sponsorCard" href="#" target="_blank" rel="noopener sponsored">
+      <img id="sponsorImg" alt="">
+      <div class="sponsor-info"><span class="pill">SPONSORED</span><div class="sponsor-title" id="sponsorTitle"></div><div class="sponsor-adv" id="sponsorAdv"></div></div>
+    </a>
+  </div>
   <div class="section">
     <div class="hero" id="hero" style="background-image:url('https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1000&q=85')">
       <button class="heart" onclick="toggleFavorite(0,event)">♡</button>
@@ -202,7 +216,7 @@ h1{font-size:31px;line-height:1.08;margin:17px 0 8px;letter-spacing:-.04em}.sub{
   <div class="section"><div class="section-head"><h2>Categories</h2><button class="see" onclick="openPage('categories')">See all</button></div>
     <div class="grid" id="homeCats"></div>
   </div>
-  <div class="section"><div class="section-head"><h2>New Today</h2><span class="sub">30 wallpapers</span></div><div class="wall-grid" id="homeWalls"></div></div>
+  <div class="section"><div class="section-head"><h2>New Today</h2><span class="sub" id="wallCount">30 wallpapers</span></div><div class="wall-grid" id="homeWalls"></div></div>
 </section>
 
 <section id="categories" class="page">
@@ -370,14 +384,16 @@ let favorites=JSON.parse(localStorage.getItem('wh-favs-v2')||'[]');let currentIn
 function wallKey(w){return (w&&w[3]&&w[3].id)||('demo-'+(w&&w[0]))}
 function isFav(w){return favorites.includes(wallKey(w))}
 function setFavorites(arr){favorites=arr;localStorage.setItem('wh-favs-v2',JSON.stringify(favorites));render();updateViewerHearts()}
-function updateViewerHearts(){let v=document.getElementById('viewer');if(!v||!walls[currentIndex])return;let t=isFav(walls[currentIndex])?'\u2665':'\u2661';document.querySelector('.viewer-top .icon-btn:last-child').textContent=t;let big=document.querySelector('.fav-big');if(big)big.textContent=t}
+let heroIdx=-1;
+function updateHero(){if(!walls.length||!walls[0][3])return;let idx=walls.findIndex(w=>w[3]&&w[3].featured);if(idx<0)idx=0;heroIdx=idx;let w=walls[idx];let hero=document.getElementById('hero');let url=(w[3]&&w[3].phoneUrl)||w[2];hero.style.backgroundImage='url("'+url.replace(/"/g,'%22')+'")';hero.querySelector('.hero-title').textContent=w[0];hero.querySelector('.hero-meta').textContent=w[1]+' \u2022 Today\'s Drop';hero.querySelector('.heart').setAttribute('onclick','toggleFavorite('+idx+',event)');hero.onclick=function(){openViewer(idx)};updateViewerHearts()}
+function updateViewerHearts(){if(heroIdx>=0&&walls[heroIdx]){document.querySelector('#hero .heart').textContent=isFav(walls[heroIdx])?'\u2665':'\u2661'}let v=document.getElementById('viewer');if(!v||!walls[currentIndex])return;let t=isFav(walls[currentIndex])?'\u2665':'\u2661';document.querySelector('.viewer-top .icon-btn:last-child').textContent=t;let big=document.querySelector('.fav-big');if(big)big.textContent=t}
 
 function catCard(c,i){return `<div class="cat" onclick="filterByCat('${c[0]}')"><img src="${c[1]}" loading="lazy"><span>${c[0]}</span></div>`}
 function wallCard(w,i){let active=isFav(w);return `<div class="wall" onclick="openViewer(${i})"><img src="${w[2]}" loading="lazy"><button class="mini-heart" onclick="toggleFavorite(${i},event)">${active?'♥':'♡'}</button><div class="wall-info"><div class="wall-title">${w[0]}</div><div class="wall-cat">${w[1]}</div></div></div>`}
 function render(){if(document.getElementById('favCount'))document.getElementById('favCount').textContent=walls.filter(isFav).length;document.getElementById('homeCats').innerHTML=cats.slice(0,6).map(catCard).join('');document.getElementById('allCats').innerHTML=cats.map(catCard).join('');document.getElementById('homeWalls').innerHTML=walls.slice(0,6).map(wallCard).join('');renderFavs();document.getElementById('searchChips').innerHTML=cats.slice(0,8).map(c=>`<button class="chip" onclick="searchWalls('${c[0]}')">${c[0]}</button>`).join('');document.getElementById('searchWalls').innerHTML=walls.map(wallCard).join('')}
 function renderFavs(){let f=walls.map((w,i)=>isFav(w)?wallCard(w,i):'').join('');document.getElementById('favWalls').innerHTML=f||'<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#8f9bb0">No favorites yet.<br>Tap ♡ on a wallpaper to save it.</div>'}
 function toggleFavorite(i,e){if(e)e.stopPropagation();let w=walls[i];if(!w)return;let id=wallKey(w);let added=!favorites.includes(id);favorites=added?[...favorites,id]:favorites.filter(x=>x!==id);localStorage.setItem('wh-favs-v2',JSON.stringify(favorites));render();updateViewerHearts();if(window.syncFavorite)window.syncFavorite(id,added)}
-function openViewer(i){currentIndex=i;let w=walls[i];let viewerUrl=(w[3]&&w[3].phoneUrl)||w[2];document.getElementById('viewerImg').src=viewerUrl;document.getElementById('viewerTitle').textContent=w[0];document.getElementById('viewerMeta').textContent=w[1]+' • New today';document.getElementById('viewer').classList.add('show');updateViewerHearts()}
+function openViewer(i){currentIndex=i;let w=walls[i];let viewerUrl=(w[3]&&(w[3].phoneUrl||w[3].pcUrl))||w[2];document.getElementById('viewerImg').src=viewerUrl;document.getElementById('viewerTitle').textContent=w[0];document.getElementById('viewerMeta').textContent=w[1]+' • New today';document.getElementById('viewer').classList.add('show');updateViewerHearts()}
 function closeViewer(){document.getElementById('viewer').classList.remove('show')}
 function openPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'})}
 function filterCats(q){document.querySelectorAll('#allCats .cat').forEach((x,i)=>x.style.display=cats[i][0].toLowerCase().includes(q.toLowerCase())?'':'none')}
@@ -457,11 +473,14 @@ render();
         // Only show wallpapers that are explicitly approved.
         if (data.approved !== true) return;
 
-        const imageUrl =
-          data.phoneUrl ||
-          data.thumbnailUrl ||
-          data.pcUrl ||
-          "";
+        // Ignore placeholder text such as YOUR_IMAGE_URL: only real web links count.
+        const isUrl = u => typeof u === "string" && /^https?:\/\//.test(u);
+        const phone = isUrl(data.phoneUrl) ? data.phoneUrl : "";
+        const pc = isUrl(data.pcUrl) ? data.pcUrl : "";
+        const thumb = isUrl(data.thumbnailUrl) ? data.thumbnailUrl : "";
+
+        // Grid uses the small thumbnail when there is one; the viewer uses the phone version.
+        const imageUrl = thumb || phone || pc || "";
 
         if (!imageUrl) return;
 
@@ -473,9 +492,9 @@ render();
             id: docSnap.id,
             season: data.season || "All",
             date: data.date || "",
-            phoneUrl: data.phoneUrl || "",
-            pcUrl: data.pcUrl || "",
-            thumbnailUrl: data.thumbnailUrl || "",
+            phoneUrl: phone,
+            pcUrl: pc,
+            thumbnailUrl: thumb,
             sponsored: data.sponsored === true,
             featured: data.featured === true
           }
@@ -488,6 +507,9 @@ render();
         walls.length = 0;
         firestoreWalls.forEach(w => walls.push(w));
         render();
+        updateHero();
+        const countEl = document.getElementById("wallCount");
+        if (countEl) countEl.textContent = firestoreWalls.length + (firestoreWalls.length === 1 ? " wallpaper" : " wallpapers");
         console.log(`WallpaperHub: loaded ${firestoreWalls.length} wallpaper(s) from Firestore.`);
       } else {
         console.warn("WallpaperHub: no approved wallpapers with image URLs found in Firestore. Keeping demo wallpapers.");
@@ -500,6 +522,41 @@ render();
 
   // Load the real wallpapers after Firebase is initialized.
   loadWallpapersFromFirestore();
+
+  // ============================================================
+  // SPONSORED AD SLOT
+  // Reads active ads from Firestore -> ads and shows the first one
+  // whose startDate <= today <= endDate (dates as YYYY-MM-DD text).
+  // ============================================================
+  async function loadSponsoredAd() {
+    try {
+      const today = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD, local time
+      const snapshot = await getDocs(
+        query(collection(db, "ads"), where("active", "==", true), limit(20))
+      );
+
+      const webLink = u => typeof u === "string" && /^https:\/\//.test(u);
+      const ad = snapshot.docs
+        .map(d => d.data())
+        .find(a =>
+          (a.slot || "featured") === "featured" &&
+          webLink(a.imageUrl) && webLink(a.linkUrl) &&
+          (!a.startDate || a.startDate <= today) &&
+          (!a.endDate || a.endDate >= today)
+        );
+
+      if (!ad) return;
+
+      document.getElementById("sponsorImg").src = ad.imageUrl;
+      document.getElementById("sponsorTitle").textContent = ad.title || ad.advertiserName || "Sponsored";
+      document.getElementById("sponsorAdv").textContent = ad.advertiserName ? "by " + ad.advertiserName : "";
+      document.getElementById("sponsorCard").href = ad.linkUrl;
+      document.getElementById("sponsorSection").style.display = "";
+    } catch (error) {
+      console.error("WallpaperHub: could not load ads.", error);
+    }
+  }
+  loadSponsoredAd();
 
   let authMode = "signin";
   let currentUser = null;
