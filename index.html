@@ -212,7 +212,7 @@ h1{font-size:31px;line-height:1.08;margin:17px 0 8px;letter-spacing:-.04em}.sub{
 </section>
 
 <section id="favorites" class="page">
-  <h1>Your Favorites</h1><div class="sub">Saved on this device. No account required.</div>
+  <h1>Your Favorites</h1><div class="sub">Saved on this device. Sign in to sync them across your devices.</div>
   <div class="section"><div class="wall-grid" id="favWalls"></div></div>
 </section>
 
@@ -366,14 +366,18 @@ const walls=[
  ['Desert Minimal','Minimal','https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=700&q=80'],
  ['Night Sky','Space',cats[5][1]],['Wild Wolf','Animals',cats[7][1]],['Green Calm','Aesthetic',cats[11][1]]
 ];
-let favorites=JSON.parse(localStorage.getItem('wh-favs')||'[]');let currentIndex=0;
+let favorites=JSON.parse(localStorage.getItem('wh-favs-v2')||'[]');let currentIndex=0;
+function wallKey(w){return (w&&w[3]&&w[3].id)||('demo-'+(w&&w[0]))}
+function isFav(w){return favorites.includes(wallKey(w))}
+function setFavorites(arr){favorites=arr;localStorage.setItem('wh-favs-v2',JSON.stringify(favorites));render();updateViewerHearts()}
+function updateViewerHearts(){let v=document.getElementById('viewer');if(!v||!walls[currentIndex])return;let t=isFav(walls[currentIndex])?'\u2665':'\u2661';document.querySelector('.viewer-top .icon-btn:last-child').textContent=t;let big=document.querySelector('.fav-big');if(big)big.textContent=t}
 
 function catCard(c,i){return `<div class="cat" onclick="filterByCat('${c[0]}')"><img src="${c[1]}" loading="lazy"><span>${c[0]}</span></div>`}
-function wallCard(w,i){let active=favorites.includes(i);return `<div class="wall" onclick="openViewer(${i})"><img src="${w[2]}" loading="lazy"><button class="mini-heart" onclick="toggleFavorite(${i},event)">${active?'♥':'♡'}</button><div class="wall-info"><div class="wall-title">${w[0]}</div><div class="wall-cat">${w[1]}</div></div></div>`}
-function render(){if(document.getElementById('favCount'))document.getElementById('favCount').textContent=favorites.length;document.getElementById('homeCats').innerHTML=cats.slice(0,6).map(catCard).join('');document.getElementById('allCats').innerHTML=cats.map(catCard).join('');document.getElementById('homeWalls').innerHTML=walls.slice(0,6).map(wallCard).join('');renderFavs();document.getElementById('searchChips').innerHTML=cats.slice(0,8).map(c=>`<button class="chip" onclick="searchWalls('${c[0]}')">${c[0]}</button>`).join('');document.getElementById('searchWalls').innerHTML=walls.map(wallCard).join('')}
-function renderFavs(){let f=walls.map((w,i)=>favorites.includes(i)?wallCard(w,i):'').join('');document.getElementById('favWalls').innerHTML=f||'<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#8f9bb0">No favorites yet.<br>Tap ♡ on a wallpaper to save it.</div>'}
-function toggleFavorite(i,e){if(e)e.stopPropagation();favorites=favorites.includes(i)?favorites.filter(x=>x!==i):[...favorites,i];localStorage.setItem('wh-favs',JSON.stringify(favorites));render();if(document.getElementById('viewer').classList.contains('show'))document.querySelector('.viewer-top .icon-btn:last-child').textContent=favorites.includes(i)?'♥':'♡'}
-function openViewer(i){currentIndex=i;let w=walls[i];let viewerUrl=(w[3]&&w[3].phoneUrl)||w[2];document.getElementById('viewerImg').src=viewerUrl;document.getElementById('viewerTitle').textContent=w[0];document.getElementById('viewerMeta').textContent=w[1]+' • New today';document.getElementById('viewer').classList.add('show')}
+function wallCard(w,i){let active=isFav(w);return `<div class="wall" onclick="openViewer(${i})"><img src="${w[2]}" loading="lazy"><button class="mini-heart" onclick="toggleFavorite(${i},event)">${active?'♥':'♡'}</button><div class="wall-info"><div class="wall-title">${w[0]}</div><div class="wall-cat">${w[1]}</div></div></div>`}
+function render(){if(document.getElementById('favCount'))document.getElementById('favCount').textContent=walls.filter(isFav).length;document.getElementById('homeCats').innerHTML=cats.slice(0,6).map(catCard).join('');document.getElementById('allCats').innerHTML=cats.map(catCard).join('');document.getElementById('homeWalls').innerHTML=walls.slice(0,6).map(wallCard).join('');renderFavs();document.getElementById('searchChips').innerHTML=cats.slice(0,8).map(c=>`<button class="chip" onclick="searchWalls('${c[0]}')">${c[0]}</button>`).join('');document.getElementById('searchWalls').innerHTML=walls.map(wallCard).join('')}
+function renderFavs(){let f=walls.map((w,i)=>isFav(w)?wallCard(w,i):'').join('');document.getElementById('favWalls').innerHTML=f||'<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#8f9bb0">No favorites yet.<br>Tap ♡ on a wallpaper to save it.</div>'}
+function toggleFavorite(i,e){if(e)e.stopPropagation();let w=walls[i];if(!w)return;let id=wallKey(w);let added=!favorites.includes(id);favorites=added?[...favorites,id]:favorites.filter(x=>x!==id);localStorage.setItem('wh-favs-v2',JSON.stringify(favorites));render();updateViewerHearts();if(window.syncFavorite)window.syncFavorite(id,added)}
+function openViewer(i){currentIndex=i;let w=walls[i];let viewerUrl=(w[3]&&w[3].phoneUrl)||w[2];document.getElementById('viewerImg').src=viewerUrl;document.getElementById('viewerTitle').textContent=w[0];document.getElementById('viewerMeta').textContent=w[1]+' • New today';document.getElementById('viewer').classList.add('show');updateViewerHearts()}
 function closeViewer(){document.getElementById('viewer').classList.remove('show')}
 function openPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));window.scrollTo({top:0,behavior:'smooth'})}
 function filterCats(q){document.querySelectorAll('#allCats .cat').forEach((x,i)=>x.style.display=cats[i][0].toLowerCase().includes(q.toLowerCase())?'':'none')}
@@ -402,7 +406,15 @@ render();
   import {
     getFirestore,
     collection,
-    getDocs
+    getDocs,
+    query,
+    where,
+    limit,
+    doc,
+    getDoc,
+    setDoc,
+    deleteDoc,
+    serverTimestamp
   } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
   // ============================================================
@@ -431,7 +443,11 @@ render();
   // ============================================================
   async function loadWallpapersFromFirestore() {
     try {
-      const snapshot = await getDocs(collection(db, "wallpapers"));
+      // The query must include the same filter as the security rule (approved == true),
+      // otherwise Firestore rejects it with "permission-denied".
+      const snapshot = await getDocs(
+        query(collection(db, "wallpapers"), where("approved", "==", true), limit(50))
+      );
 
       const firestoreWalls = [];
 
@@ -662,9 +678,68 @@ render();
     }
   }
 
-  onAuthStateChanged(auth, user => {
+  // ============================================================
+  // USER PROFILE + FAVORITES SYNC
+  // users/{uid}                      -> name, email, createdAt
+  // users/{uid}/favorites/{wallId}   -> addedAt
+  // ============================================================
+  let wasSignedIn = false;
+
+  async function ensureUserProfile(user) {
+    const ref = doc(db, "users", user.uid);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      await setDoc(ref, {
+        name: user.displayName || "",
+        email: user.email || "",
+        createdAt: serverTimestamp()
+      });
+    }
+  }
+
+  async function syncFavoritesOnLogin(user) {
+    const favCol = collection(db, "users", user.uid, "favorites");
+    const cloudSnap = await getDocs(favCol);
+    const cloudIds = cloudSnap.docs.map(d => d.id);
+
+    // Favorites saved as a guest on this device get uploaded once.
+    const localIds = favorites.filter(id => !id.startsWith("demo-"));
+    const toUpload = localIds.filter(id => !cloudIds.includes(id));
+    await Promise.all(toUpload.map(id =>
+      setDoc(doc(db, "users", user.uid, "favorites", id), { addedAt: serverTimestamp() })
+    ));
+
+    setFavorites([...new Set([...cloudIds, ...localIds])]);
+  }
+
+  window.syncFavorite = async function(id, added) {
+    if (!currentUser || id.startsWith("demo-")) return;
+    try {
+      const ref = doc(db, "users", currentUser.uid, "favorites", id);
+      if (added) await setDoc(ref, { addedAt: serverTimestamp() });
+      else await deleteDoc(ref);
+    } catch (error) {
+      console.error("WallpaperHub: could not sync favorite.", error);
+    }
+  };
+
+  onAuthStateChanged(auth, async user => {
     currentUser = user;
     updateProfileUI(user);
+
+    if (user) {
+      wasSignedIn = true;
+      try {
+        await ensureUserProfile(user);
+        await syncFavoritesOnLogin(user);
+      } catch (error) {
+        console.error("WallpaperHub: profile/favorites sync failed.", error);
+      }
+    } else if (wasSignedIn) {
+      // Signed out: clear this device so the next person doesn't see the account's favorites.
+      wasSignedIn = false;
+      setFavorites([]);
+    }
   });
 
   // Close when clicking outside the authentication card.
@@ -680,4 +755,3 @@ render();
 
 </body>
 </html>
-
